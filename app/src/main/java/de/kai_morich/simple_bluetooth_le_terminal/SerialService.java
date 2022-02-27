@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -211,11 +213,15 @@ public class SerialService extends Service implements SerialListener {
 
     public void onSerialRead(byte[] data) {
         if(connected) {
+            Intent intent = new Intent("TASKER_BLE");
+            intent.setData(Uri.parse("tasker:" + new String(data)));
+            sendBroadcast(intent);
             synchronized (this) {
                 if (listener != null) {
                     mainLooper.post(() -> {
                         if (listener != null) {
                             listener.onSerialRead(data);
+                            // Send intent to Tasker
                         } else {
                             queue1.add(new QueueItem(QueueType.Read, data, null));
                         }
