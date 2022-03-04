@@ -5,8 +5,12 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -14,11 +18,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -73,6 +77,23 @@ public class SerialService extends Service implements SerialListener {
         return binder;
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int startFlag = super.onStartCommand(intent, flags, startId);
+        String action = intent.getStringExtra("action");
+        if (action != null && action.equalsIgnoreCase("connect") && intent.hasExtra("macAddress")) {
+            String macAddress = intent.getStringExtra("macAddress");
+            Toast.makeText(getApplicationContext(), String.format("Connecting to MAC address: [%s]", macAddress), Toast.LENGTH_SHORT).show();
+            connectToMac(macAddress);
+            createNotification();
+        } else if (action != null && action.equalsIgnoreCase("disconnect")) {
+            Toast.makeText(getApplicationContext(), "Stopping BLE service", Toast.LENGTH_SHORT).show();
+            disconnect();
+            stopSelf();
+        }
+        return startFlag;
+    }
+
     /**
      * Api
      */
@@ -82,6 +103,17 @@ public class SerialService extends Service implements SerialListener {
         connected = true;
     }
 
+    private void connectToMac(String macAddress) {
+        try {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(macAddress);
+            SerialSocket socket = new SerialSocket(getApplicationContext(), device);
+            connect(socket);
+        } catch (Exception e) {
+            onSerialConnectError(e);
+        }
+    }
+
     public void disconnect() {
         connected = false; // ignore data,errors while disconnecting
         cancelNotification();
@@ -89,6 +121,7 @@ public class SerialService extends Service implements SerialListener {
             socket.disconnect();
             socket = null;
         }
+        stopSelf();
     }
 
     public void write(byte[] data) throws IOException {
@@ -254,5 +287,4 @@ public class SerialService extends Service implements SerialListener {
             }
         }
     }
-
 }

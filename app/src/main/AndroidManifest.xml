@@ -26,7 +26,13 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".SerialService" />
+        <service
+            android:name=".SerialService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="de.kai_morich.simple_bluetooth_le_terminal.SerialService"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
