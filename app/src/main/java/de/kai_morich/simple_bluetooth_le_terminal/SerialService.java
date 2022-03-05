@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -53,6 +54,11 @@ public class SerialService extends Service implements SerialListener {
     private SerialSocket socket;
     private SerialListener listener;
     private boolean connected;
+    private String macAddress;
+
+    private final int MAX_RETRY_TIME = 1000 * 60 * 5; // 5 minutes
+    private int retryConnectionInterval = 200;
+    long retryConnectionStart = 0;
 
     /**
      * Lifecylce
@@ -83,11 +89,11 @@ public class SerialService extends Service implements SerialListener {
         String action = intent.getStringExtra("action");
         if (action != null && action.equalsIgnoreCase("connect") && intent.hasExtra("macAddress")) {
             String macAddress = intent.getStringExtra("macAddress");
-            Toast.makeText(getApplicationContext(), String.format("Connecting to MAC address: [%s]", macAddress), Toast.LENGTH_SHORT).show();
             connectToMac(macAddress);
             createNotification();
         } else if (action != null && action.equalsIgnoreCase("disconnect")) {
-            Toast.makeText(getApplicationContext(), "Stopping BLE service", Toast.LENGTH_SHORT).show();
+            sendTaskerInfoIntent("Stopping BLE service");
+            macAddress = null; // Prevents reconnecting
             disconnect();
             stopSelf();
         }
@@ -104,6 +110,8 @@ public class SerialService extends Service implements SerialListener {
     }
 
     private void connectToMac(String macAddress) {
+        sendTaskerInfoIntent(String.format("Connecting to MAC address: [%s]", macAddress));
+        this.macAddress = macAddress;
         try {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             BluetoothDevice device = bluetoothAdapter.getRemoteDevice(macAddress);
@@ -115,6 +123,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void disconnect() {
+        sendTaskerInfoIntent("Disconnecting");
         connected = false; // ignore data,errors while disconnecting
         cancelNotification();
         if(socket != null) {
@@ -223,6 +232,12 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void onSerialConnectError(Exception e) {
+        sendTaskerInfoIntent(String.format("SerialConnectError : [%s])", e));
+        boolean stopService = retryConnection();
+        if (!stopService && e.getMessage() != null && e.getMessage().toLowerCase().startsWith("gatt status")) {
+            return;
+        }
+
         if(connected) {
             synchronized (this) {
                 if (listener != null) {
@@ -267,6 +282,12 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void onSerialIoError(Exception e) {
+        sendTaskerInfoIntent(String.format("SerialIoError : [%s])", e));
+        boolean stopService = retryConnection();
+        if (!stopService && e.getMessage() != null && e.getMessage().toLowerCase().startsWith("gatt status")) {
+            return;
+        }
+
         if(connected) {
             synchronized (this) {
                 if (listener != null) {
@@ -286,5 +307,32 @@ public class SerialService extends Service implements SerialListener {
                 }
             }
         }
+    }
+
+    // Retry connection for a maximum of 5 minutes, with increasing interval between retries
+    private boolean retryConnection() {
+        if (retryConnectionStart == 0) {
+            retryConnectionStart = Calendar.getInstance().getTimeInMillis();
+        } else if (Calendar.getInstance().getTimeInMillis() - retryConnectionStart > MAX_RETRY_TIME || macAddress == null) {
+            return true;
+        }
+        if (this.socket != null) {
+            socket.disconnect();
+        }
+        try {
+            Thread.sleep(retryConnectionInterval);
+            retryConnectionInterval = Math.max(retryConnectionInterval * 2, 5000); // Double interval between retries until it is 5 seconds
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+        sendTaskerInfoIntent("Trying to reconnect");
+        connectToMac(macAddress);
+        return false;
+    }
+
+    private void sendTaskerInfoIntent(String text) {
+        Intent intent = new Intent("TASKER_BLE_INFO"); //TODO
+        intent.setData(Uri.parse("tasker: [" + Calendar.getInstance().getTime() + "] - " + text));
+        sendBroadcast(intent);
     }
 }
