@@ -7,10 +7,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -18,7 +16,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
-import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
@@ -56,9 +53,8 @@ public class SerialService extends Service implements SerialListener {
     private boolean connected;
     private String macAddress;
 
-    private final int MAX_RETRY_TIME = 1000 * 60 * 5; // 5 minutes
-    private int retryConnectionInterval = 200;
-    long retryConnectionStart = 0;
+    private int reconnectTimeout = 1000 * 60 * 5; // 5 minutes
+    long retryConnectionStartTime = 0;
 
     /**
      * Lifecylce
@@ -89,6 +85,7 @@ public class SerialService extends Service implements SerialListener {
         String action = intent.getStringExtra("action");
         if (action != null && action.equalsIgnoreCase("connect") && intent.hasExtra("macAddress")) {
             String macAddress = intent.getStringExtra("macAddress");
+            reconnectTimeout = intent.getIntExtra("reconnectTimeout", reconnectTimeout);
             connectToMac(macAddress);
             createNotification();
         } else if (action != null && action.equalsIgnoreCase("disconnect")) {
@@ -110,7 +107,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     private void connectToMac(String macAddress) {
-        sendTaskerInfoIntent(String.format("Connecting to MAC address: [%s]", macAddress));
+        sendTaskerInfoIntent(String.format("Connecting to MAC address: [%s]...", macAddress));
         this.macAddress = macAddress;
         try {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -214,6 +211,8 @@ public class SerialService extends Service implements SerialListener {
      * SerialListener
      */
     public void onSerialConnect() {
+        sendTaskerInfoIntent("Connection successful");
+        retryConnectionStartTime = 0;
         if(connected) {
             synchronized (this) {
                 if (listener != null) {
@@ -311,19 +310,13 @@ public class SerialService extends Service implements SerialListener {
 
     // Retry connection for a maximum of 5 minutes, with increasing interval between retries
     private boolean retryConnection() {
-        if (retryConnectionStart == 0) {
-            retryConnectionStart = Calendar.getInstance().getTimeInMillis();
-        } else if (Calendar.getInstance().getTimeInMillis() - retryConnectionStart > MAX_RETRY_TIME || macAddress == null) {
+        if (retryConnectionStartTime == 0) {
+            retryConnectionStartTime = Calendar.getInstance().getTimeInMillis();
+        } else if (reconnectTimeout != 0 && Calendar.getInstance().getTimeInMillis() - retryConnectionStartTime > reconnectTimeout || macAddress == null) {
             return true;
         }
         if (this.socket != null) {
             socket.disconnect();
-        }
-        try {
-            Thread.sleep(retryConnectionInterval);
-            retryConnectionInterval = Math.max(retryConnectionInterval * 2, 5000); // Double interval between retries until it is 5 seconds
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
         }
         sendTaskerInfoIntent("Trying to reconnect");
         connectToMac(macAddress);
