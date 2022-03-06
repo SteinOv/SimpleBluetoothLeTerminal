@@ -11,6 +11,7 @@ personal Arduino project in mind and this is my first time coding in Android, so
 If you spot any, please let me know. 
 
 ## How To Use
+First install the apk which can be found under app -> release
 ### Sending data
 Create a new intent with component name package `de.kai_morich.simple_bluetooth_le_terminal` and class `de.kai_morich.simple_bluetooth_le_terminal.SerialService`.
 Add parameters as extra's (key, value pairs), keys are case-insensitive. Send the intent using context.StartForegroundService(intent)<br>
