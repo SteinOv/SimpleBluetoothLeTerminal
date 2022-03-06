@@ -82,18 +82,19 @@ public class SerialService extends Service implements SerialListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int startFlag = super.onStartCommand(intent, flags, startId);
-        String action = intent.getStringExtra("action");
-        if (action != null && action.equalsIgnoreCase("connect") && intent.hasExtra("macAddress")) {
+        String command = intent.getStringExtra("command");
+        if (command != null && command.equalsIgnoreCase("connect") && intent.hasExtra("macAddress")) {
             String macAddress = intent.getStringExtra("macAddress");
             reconnectTimeout = intent.getIntExtra("reconnectTimeout", reconnectTimeout);
+            sendTaskerInfoIntent(String.format("Establishing new BLE connection; macAddress: [%s], reconnectTimeout: [%d] ms", macAddress, reconnectTimeout));
             connectToMac(macAddress);
             createNotification();
-        } else if (action != null && action.equalsIgnoreCase("disconnect")) {
+        } else if (command != null && command.equalsIgnoreCase("disconnect")) {
             sendTaskerInfoIntent("Stopping BLE service");
             macAddress = null; // Prevents reconnecting
             disconnect();
             stopSelf();
-        } else if (action != null && action.equalsIgnoreCase("send")) {
+        } else if (command != null && command.equalsIgnoreCase("send")) {
             String text = intent.getStringExtra("text");
             if (text == null) {
                 sendTaskerInfoIntent("No text extra, unable to send");
@@ -319,7 +320,7 @@ public class SerialService extends Service implements SerialListener {
     private boolean retryConnection() {
         if (retryConnectionStartTime == 0) {
             retryConnectionStartTime = Calendar.getInstance().getTimeInMillis();
-        } else if (reconnectTimeout != 0 && Calendar.getInstance().getTimeInMillis() - retryConnectionStartTime > reconnectTimeout || macAddress == null) {
+        } else if ((reconnectTimeout != 0 && Calendar.getInstance().getTimeInMillis() - retryConnectionStartTime > reconnectTimeout) || macAddress == null) {
             return true;
         }
         if (this.socket != null) {
