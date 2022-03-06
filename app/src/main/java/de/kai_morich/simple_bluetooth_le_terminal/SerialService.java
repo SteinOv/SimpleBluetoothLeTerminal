@@ -93,6 +93,13 @@ public class SerialService extends Service implements SerialListener {
             macAddress = null; // Prevents reconnecting
             disconnect();
             stopSelf();
+        } else if (action != null && action.equalsIgnoreCase("send")) {
+            String text = intent.getStringExtra("text");
+            if (text == null) {
+                sendTaskerInfoIntent("No text extra, unable to send");
+                return startFlag;
+            }
+            sendString(text);
         }
         return startFlag;
     }
@@ -321,6 +328,16 @@ public class SerialService extends Service implements SerialListener {
         sendTaskerInfoIntent("Trying to reconnect");
         connectToMac(macAddress);
         return false;
+    }
+
+    // Send string to connected device
+    private void sendString(String text) {
+        try {
+            write(text.getBytes());
+        } catch (IOException e) {
+            sendTaskerInfoIntent(String.format("Failed to send string [%s]", text));
+            onSerialIoError(e);
+        }
     }
 
     private void sendTaskerInfoIntent(String text) {
