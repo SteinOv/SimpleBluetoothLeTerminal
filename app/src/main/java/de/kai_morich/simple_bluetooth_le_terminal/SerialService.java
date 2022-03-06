@@ -91,7 +91,6 @@ public class SerialService extends Service implements SerialListener {
             createNotification();
         } else if (command != null && command.equalsIgnoreCase("disconnect")) {
             sendTaskerInfoIntent("Stopping BLE service");
-            macAddress = null; // Prevents reconnecting
             disconnect();
             stopSelf();
         } else if (command != null && command.equalsIgnoreCase("send")) {
@@ -129,6 +128,7 @@ public class SerialService extends Service implements SerialListener {
 
     public void disconnect() {
         sendTaskerInfoIntent("Disconnecting");
+        macAddress = null; // Prevents reconnecting
         connected = false; // ignore data,errors while disconnecting
         cancelNotification();
         if(socket != null) {
@@ -342,7 +342,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     private void sendTaskerInfoIntent(String text) {
-        Intent intent = new Intent("TASKER_BLE_INFO"); //TODO
+        Intent intent = new Intent("TASKER_BLE_INFO");
         intent.setData(Uri.parse("tasker: [" + Calendar.getInstance().getTime() + "] - " + text));
         sendBroadcast(intent);
     }
