@@ -10,6 +10,16 @@ Keep in mind that the external intents can be sent by any app, which may be a se
 personal Arduino project in mind and this is my first time coding in Android, so there may be some bugs/imperfections. 
 If you spot any, please let me know. 
 
+### Known bugs
+- Service crashes when sending another connect command while it is trying to establish a connection or trying to reconnect.
+- When trying to send a message while no BLE device is connected, it will try to connect to MAC address null.
+- When trying to send a message while the service is reconnecting, it will stop trying to reconnect.
+- Connecting using the GUI after service is connected through intent results in two connections at the same time 
+(and two intents are received for each message)
+
+I will probably only fix these bugs when they give me problems. So if they give problems for you, let me know, I'll see 
+if I have time to fix them. 
+
 ## How To Use
 First install the apk which can be found under app -> release
 ### Sending data
