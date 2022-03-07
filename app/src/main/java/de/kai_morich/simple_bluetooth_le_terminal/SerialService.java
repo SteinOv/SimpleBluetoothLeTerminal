@@ -86,6 +86,10 @@ public class SerialService extends Service implements SerialListener {
         if (command != null && command.equalsIgnoreCase("connect") && intent.hasExtra("macAddress")) {
             String macAddress = intent.getStringExtra("macAddress");
             reconnectTimeout = intent.getIntExtra("reconnectTimeout", reconnectTimeout);
+            if (connected) {
+                sendTaskerInfoIntent(String.format("Already connected to MAC address: [%s], disconnecting first", this.macAddress));
+                disconnect();
+            }
             sendTaskerInfoIntent(String.format("Establishing new BLE connection; macAddress: [%s], reconnectTimeout: [%d] ms", macAddress, reconnectTimeout));
             connectToMac(macAddress);
             createNotification();
