@@ -87,20 +87,20 @@ public class SerialService extends Service implements SerialListener {
             String macAddress = intent.getStringExtra("macAddress");
             reconnectTimeout = intent.getIntExtra("reconnectTimeout", reconnectTimeout);
             if (connected) {
-                sendTaskerInfoIntent(String.format("Already connected to MAC address: [%s], disconnecting first", this.macAddress));
+                sendTaskerDebugIntent(String.format("Already connected to MAC address: [%s], disconnecting first", this.macAddress));
                 disconnect();
             }
-            sendTaskerInfoIntent(String.format("Establishing new BLE connection; macAddress: [%s], reconnectTimeout: [%d] ms", macAddress, reconnectTimeout));
+            sendTaskerDebugIntent(String.format("Establishing new BLE connection; macAddress: [%s], reconnectTimeout: [%d] ms", macAddress, reconnectTimeout));
             connectToMac(macAddress);
             createNotification();
         } else if (command != null && command.equalsIgnoreCase("disconnect")) {
-            sendTaskerInfoIntent("Stopping BLE service");
+            sendTaskerDebugIntent("Stopping BLE service");
             disconnect();
             stopSelf();
         } else if (command != null && command.equalsIgnoreCase("send")) {
             String text = intent.getStringExtra("text");
             if (text == null) {
-                sendTaskerInfoIntent("No text extra, unable to send");
+                sendTaskerDebugIntent("No text extra, unable to send");
                 return startFlag;
             }
             sendString(text);
@@ -118,7 +118,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     private void connectToMac(String macAddress) {
-        sendTaskerInfoIntent(String.format("Connecting to MAC address: [%s]...", macAddress));
+        sendTaskerDebugIntent(String.format("Connecting to MAC address: [%s]...", macAddress));
         this.macAddress = macAddress;
         try {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -131,13 +131,14 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void disconnect() {
-        sendTaskerInfoIntent("Disconnecting");
+        sendTaskerDebugIntent("Disconnecting");
         macAddress = null; // Prevents reconnecting
         connected = false; // ignore data,errors while disconnecting
         cancelNotification();
         if(socket != null) {
             socket.disconnect();
             socket = null;
+            sendTaskerEventIntent("disconnected");
         }
         stopSelf();
     }
@@ -223,7 +224,8 @@ public class SerialService extends Service implements SerialListener {
      * SerialListener
      */
     public void onSerialConnect() {
-        sendTaskerInfoIntent("Connection successful");
+        sendTaskerDebugIntent("Connection successful");
+        sendTaskerEventIntent("connected");
         retryConnectionStartTime = 0;
         if(connected) {
             synchronized (this) {
@@ -243,7 +245,8 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void onSerialConnectError(Exception e) {
-        sendTaskerInfoIntent(String.format("SerialConnectError : [%s])", e));
+        sendTaskerDebugIntent(String.format("SerialConnectError : [%s])", e));
+        sendTaskerEventIntent("error");
         boolean stopService = retryConnection();
         if (!stopService && e.getMessage() != null && e.getMessage().toLowerCase().startsWith("gatt status")) {
             return;
@@ -293,7 +296,8 @@ public class SerialService extends Service implements SerialListener {
     }
 
     public void onSerialIoError(Exception e) {
-        sendTaskerInfoIntent(String.format("SerialIoError : [%s])", e));
+        sendTaskerDebugIntent(String.format("SerialIoError : [%s])", e));
+        sendTaskerEventIntent("error");
         boolean stopService = retryConnection();
         if (!stopService && e.getMessage() != null && e.getMessage().toLowerCase().startsWith("gatt status")) {
             return;
@@ -330,7 +334,7 @@ public class SerialService extends Service implements SerialListener {
         if (this.socket != null) {
             socket.disconnect();
         }
-        sendTaskerInfoIntent("Trying to reconnect");
+        sendTaskerDebugIntent("Trying to reconnect");
         connectToMac(macAddress);
         return false;
     }
@@ -340,14 +344,20 @@ public class SerialService extends Service implements SerialListener {
         try {
             write(text.getBytes());
         } catch (IOException e) {
-            sendTaskerInfoIntent(String.format("Failed to send string [%s]", text));
+            sendTaskerDebugIntent(String.format("Failed to send string [%s]", text));
             onSerialIoError(e);
         }
     }
 
-    private void sendTaskerInfoIntent(String text) {
-        Intent intent = new Intent("TASKER_BLE_INFO");
+    private void sendTaskerDebugIntent(String text) {
+        Intent intent = new Intent("TASKER_BLE_DEBUG");
         intent.setData(Uri.parse("tasker: [" + Calendar.getInstance().getTime() + "] - " + text));
+        sendBroadcast(intent);
+    }
+
+    private void sendTaskerEventIntent(String text) {
+        Intent intent = new Intent("TASKER_BLE_EVENT");
+        intent.setData(Uri.parse("tasker: " + text));
         sendBroadcast(intent);
     }
 }

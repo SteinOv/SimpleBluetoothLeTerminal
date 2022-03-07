@@ -43,12 +43,16 @@ Maximum amount of time the service should try to reconnect after losing connecti
 String to send to connected device.
 
 ### Receiving data
-The service will send an intent with action `TASKER_BLE` and scheme `tasker` with data in the form: `tasker: <string sent by BLE device>`<br>
-Additionally, for debugging purposes, some logging is sent via an intent with action `TASKER_BLE_INFO`, and scheme `tasker`.
+The service will send an intent with action `TASKER_BLE` and scheme `tasker` with data in the form: `tasker:<string sent by BLE device>`<br>
+To be able to react to error, connect and disconnect events, these events are sent in an intent with action `TASKER_BLE_EVENT` 
+and scheme `tasker`. The possible data values are `tasker: connected` (after connecting to device), `tasker: disconnected` 
+(after disconnecting from device) and `tasker: error` (after a connection/send error has occurred). 
+Additionally, for debugging purposes, some logging is sent via an intent with action `TASKER_BLE_DEBUG`, and scheme `tasker`.
 
 ### Tasker specific instructions
-You can send intents in tasker by using the `Java Function` task. You can receive intents using the `Intent Received` event, then the data will be available in the local variable `%intent_data`.
-You can import taskerBleExample.xml into Tasker for working examples.
+You can send intents in tasker by using the `Java Function` task. You can receive intents using the `Intent Received` event, 
+then the data will be available in the local variable `%intent_data`.
+You can import taskerBleExample.xml into Tasker for working examples (all you have to do is change the macAddress in the connectToMacAddress task).
 
 ### More information
 [Tasker User Guide - Intents](https://tasker.joaoapps.com/userguide/en/intents.html) <br>

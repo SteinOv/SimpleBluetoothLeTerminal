@@ -2,7 +2,7 @@
 	<Profile sr="prof84" ve="2">
 		<cdate>1645987155359</cdate>
 		<clp>true</clp>
-		<edate>1646590118169</edate>
+		<edate>1646637429236</edate>
 		<flags>8</flags>
 		<id>84</id>
 		<mid0>86</mid0>
@@ -18,14 +18,32 @@
 	</Profile>
 	<Profile sr="prof85" ve="2">
 		<cdate>1645987155359</cdate>
-		<edate>1646590553837</edate>
+		<clp>true</clp>
+		<edate>1646678852067</edate>
 		<flags>8</flags>
 		<id>85</id>
-		<mid0>87</mid0>
-		<nme>TaskerInfoBleIntent</nme>
+		<mid0>89</mid0>
+		<nme>TaskerDebugBleIntent</nme>
 		<Event sr="con0" ve="2">
 			<code>599</code>
-			<Str sr="arg0" ve="3">TASKER_BLE_INFO</Str>
+			<Str sr="arg0" ve="3">TASKER_BLE_DEBUG</Str>
+			<Int sr="arg1" val="0"/>
+			<Int sr="arg2" val="0"/>
+			<Str sr="arg3" ve="3">tasker</Str>
+			<Str sr="arg4" ve="3"/>
+		</Event>
+	</Profile>
+	<Profile sr="prof88" ve="2">
+		<cdate>1645987155359</cdate>
+		<clp>true</clp>
+		<edate>1646679034559</edate>
+		<flags>8</flags>
+		<id>88</id>
+		<mid0>87</mid0>
+		<nme>TaskerEventBleIntent</nme>
+		<Event sr="con0" ve="2">
+			<code>599</code>
+			<Str sr="arg0" ve="3">TASKER_BLE_EVENT</Str>
 			<Int sr="arg1" val="0"/>
 			<Int sr="arg2" val="0"/>
 			<Str sr="arg3" ve="3">tasker</Str>
@@ -35,12 +53,12 @@
 	<Project sr="proj0" ve="2">
 		<cdate>1646590000154</cdate>
 		<name>BLE</name>
-		<pids>84,85</pids>
-		<tids>83,87,82,86,74</tids>
+		<pids>84,85,88</pids>
+		<tids>89,87,86,83,82,74</tids>
 	</Project>
 	<Task sr="task74">
 		<cdate>1646245811281</cdate>
-		<edate>1646590578806</edate>
+		<edate>1646679096941</edate>
 		<id>74</id>
 		<nme>ConnectToMacAddress</nme>
 		<pri>100</pri>
@@ -49,7 +67,7 @@
 			<Str sr="arg0" ve="3">intent</Str>
 			<Str sr="arg1" ve="3">Intent</Str>
 			<Str sr="arg2" ve="3">new
-{Intent} ()</Str>
+				{Intent} ()</Str>
 			<Str sr="arg3" ve="3"/>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -63,7 +81,7 @@
 			<Str sr="arg0" ve="3">componentName</Str>
 			<Str sr="arg1" ve="3">ComponentName</Str>
 			<Str sr="arg2" ve="3">new
-{ComponentName} (String, String)</Str>
+				{ComponentName} (String, String)</Str>
 			<Str sr="arg3" ve="3">de.kai_morich.simple_bluetooth_le_terminal</Str>
 			<Str sr="arg4" ve="3">de.kai_morich.simple_bluetooth_le_terminal.SerialService</Str>
 			<Str sr="arg5" ve="3"/>
@@ -77,7 +95,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">setComponent
-{Intent} (ComponentName)</Str>
+				{Intent} (ComponentName)</Str>
 			<Str sr="arg3" ve="3">componentName</Str>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -91,7 +109,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">putExtra
-{Intent} (String, String)</Str>
+				{Intent} (String, String)</Str>
 			<Str sr="arg3" ve="3">command</Str>
 			<Str sr="arg4" ve="3">connect</Str>
 			<Str sr="arg5" ve="3"/>
@@ -105,7 +123,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">putExtra
-{Intent} (String, int)</Str>
+				{Intent} (String, int)</Str>
 			<Str sr="arg3" ve="3">reconnectTimeout</Str>
 			<Str sr="arg4" ve="3">0</Str>
 			<Str sr="arg5" ve="3"/>
@@ -119,7 +137,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">putExtra
-{Intent} (String, String)</Str>
+				{Intent} (String, String)</Str>
 			<Str sr="arg3" ve="3">macAddress</Str>
 			<Str sr="arg4" ve="3">AA:11:BB:C3:D5:B6:66</Str>
 			<Str sr="arg5" ve="3"/>
@@ -133,7 +151,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">CONTEXT</Str>
 			<Str sr="arg2" ve="3">startForegroundService
-{ComponentName} (Intent)</Str>
+				{ComponentName} (Intent)</Str>
 			<Str sr="arg3" ve="3">intent</Str>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -145,7 +163,7 @@
 	</Task>
 	<Task sr="task82">
 		<cdate>1646245811281</cdate>
-		<edate>1646588929048</edate>
+		<edate>1646679103779</edate>
 		<id>82</id>
 		<nme>Disconnect</nme>
 		<pri>100</pri>
@@ -154,7 +172,7 @@
 			<Str sr="arg0" ve="3">intent</Str>
 			<Str sr="arg1" ve="3">Intent</Str>
 			<Str sr="arg2" ve="3">new
-{Intent} ()</Str>
+				{Intent} ()</Str>
 			<Str sr="arg3" ve="3"/>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -168,7 +186,7 @@
 			<Str sr="arg0" ve="3">componentName</Str>
 			<Str sr="arg1" ve="3">ComponentName</Str>
 			<Str sr="arg2" ve="3">new
-{ComponentName} (String, String)</Str>
+				{ComponentName} (String, String)</Str>
 			<Str sr="arg3" ve="3">de.kai_morich.simple_bluetooth_le_terminal</Str>
 			<Str sr="arg4" ve="3">de.kai_morich.simple_bluetooth_le_terminal.SerialService</Str>
 			<Str sr="arg5" ve="3"/>
@@ -182,7 +200,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">setComponent
-{Intent} (ComponentName)</Str>
+				{Intent} (ComponentName)</Str>
 			<Str sr="arg3" ve="3">componentName</Str>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -196,7 +214,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">putExtra
-{Intent} (String, String)</Str>
+				{Intent} (String, String)</Str>
 			<Str sr="arg3" ve="3">command</Str>
 			<Str sr="arg4" ve="3">disconnect</Str>
 			<Str sr="arg5" ve="3"/>
@@ -210,7 +228,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">CONTEXT</Str>
 			<Str sr="arg2" ve="3">startForegroundService
-{ComponentName} (Intent)</Str>
+				{ComponentName} (Intent)</Str>
 			<Str sr="arg3" ve="3">intent</Str>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -222,7 +240,7 @@
 	</Task>
 	<Task sr="task83">
 		<cdate>1646245811281</cdate>
-		<edate>1646590596646</edate>
+		<edate>1646664212260</edate>
 		<id>83</id>
 		<nme>Send</nme>
 		<pri>100</pri>
@@ -231,7 +249,7 @@
 			<Str sr="arg0" ve="3">intent</Str>
 			<Str sr="arg1" ve="3">Intent</Str>
 			<Str sr="arg2" ve="3">new
-{Intent} ()</Str>
+				{Intent} ()</Str>
 			<Str sr="arg3" ve="3"/>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -245,7 +263,7 @@
 			<Str sr="arg0" ve="3">componentName</Str>
 			<Str sr="arg1" ve="3">ComponentName</Str>
 			<Str sr="arg2" ve="3">new
-{ComponentName} (String, String)</Str>
+				{ComponentName} (String, String)</Str>
 			<Str sr="arg3" ve="3">de.kai_morich.simple_bluetooth_le_terminal</Str>
 			<Str sr="arg4" ve="3">de.kai_morich.simple_bluetooth_le_terminal.SerialService</Str>
 			<Str sr="arg5" ve="3"/>
@@ -259,7 +277,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">setComponent
-{Intent} (ComponentName)</Str>
+				{Intent} (ComponentName)</Str>
 			<Str sr="arg3" ve="3">componentName</Str>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -273,7 +291,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">putExtra
-{Intent} (String, String)</Str>
+				{Intent} (String, String)</Str>
 			<Str sr="arg3" ve="3">command</Str>
 			<Str sr="arg4" ve="3">send</Str>
 			<Str sr="arg5" ve="3"/>
@@ -287,7 +305,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">intent</Str>
 			<Str sr="arg2" ve="3">putExtra
-{Intent} (String, String)</Str>
+				{Intent} (String, String)</Str>
 			<Str sr="arg3" ve="3">text</Str>
 			<Str sr="arg4" ve="3">hello world</Str>
 			<Str sr="arg5" ve="3"/>
@@ -301,7 +319,7 @@
 			<Str sr="arg0" ve="3"/>
 			<Str sr="arg1" ve="3">CONTEXT</Str>
 			<Str sr="arg2" ve="3">startForegroundService
-{ComponentName} (Intent)</Str>
+				{ComponentName} (Intent)</Str>
 			<Str sr="arg3" ve="3">intent</Str>
 			<Str sr="arg4" ve="3"/>
 			<Str sr="arg5" ve="3"/>
@@ -313,7 +331,7 @@
 	</Task>
 	<Task sr="task86">
 		<cdate>1645987165125</cdate>
-		<edate>1646590141436</edate>
+		<edate>1646637429236</edate>
 		<id>86</id>
 		<nme>ReceivedData</nme>
 		<pri>6</pri>
@@ -331,7 +349,7 @@
 			<code>547</code>
 			<Str sr="arg0" ve="3">%IntentData</Str>
 			<Str sr="arg1" ve="3">-%intent_data
-</Str>
+			</Str>
 			<Int sr="arg2" val="0"/>
 			<Int sr="arg3" val="0"/>
 			<Int sr="arg4" val="1"/>
@@ -341,21 +359,47 @@
 	</Task>
 	<Task sr="task87">
 		<cdate>1645987165125</cdate>
-		<edate>1646590586269</edate>
+		<edate>1646679026884</edate>
 		<id>87</id>
-		<nme>ReceivedInfo</nme>
+		<nme>ReceivedEvent</nme>
 		<pri>6</pri>
 		<rty>2</rty>
 		<Action sr="act0" ve="7">
 			<code>548</code>
+			<on>false</on>
 			<Str sr="arg0" ve="3">Received: %intent_data</Str>
 			<Int sr="arg1" val="0"/>
 		</Action>
 		<Action sr="act1" ve="7">
 			<code>547</code>
-			<Str sr="arg0" ve="3">%IntentInfo</Str>
+			<Str sr="arg0" ve="3">%IntentEvent</Str>
 			<Str sr="arg1" ve="3">-%intent_data
-</Str>
+			</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="1"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="1"/>
+		</Action>
+	</Task>
+	<Task sr="task89">
+		<cdate>1645987165125</cdate>
+		<edate>1646678894939</edate>
+		<id>89</id>
+		<nme>ReceivedDebug</nme>
+		<pri>6</pri>
+		<rty>2</rty>
+		<Action sr="act0" ve="7">
+			<code>548</code>
+			<on>false</on>
+			<Str sr="arg0" ve="3">Received: %intent_data</Str>
+			<Int sr="arg1" val="0"/>
+		</Action>
+		<Action sr="act1" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%IntentDebug</Str>
+			<Str sr="arg1" ve="3">-%intent_data
+			</Str>
 			<Int sr="arg2" val="0"/>
 			<Int sr="arg3" val="0"/>
 			<Int sr="arg4" val="1"/>
