@@ -20,9 +20,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * create notification and queue serial data while activity is not in the foreground
@@ -38,15 +37,21 @@ public class SerialService extends Service implements SerialListener {
 
     private static class QueueItem {
         QueueType type;
-        byte[] data;
+        ArrayDeque<byte[]> datas;
         Exception e;
 
-        QueueItem(QueueType type, byte[] data, Exception e) { this.type=type; this.data=data; this.e=e; }
+        QueueItem(QueueType type) { this.type=type; if(type==QueueType.Read) init(); }
+        QueueItem(QueueType type, Exception e) { this.type=type; this.e=e; }
+        QueueItem(QueueType type, ArrayDeque<byte[]> datas) { this.type=type; this.datas=datas; }
+
+        void init() { datas = new ArrayDeque<>(); }
+        void add(byte[] data) { datas.add(data); }
     }
 
     private final Handler mainLooper;
     private final IBinder binder;
-    private final Queue<QueueItem> queue1, queue2;
+    private final ArrayDeque<QueueItem> queue1, queue2;
+    private final QueueItem lastRead;
 
     private SerialSocket socket;
     private SerialListener listener;
@@ -62,8 +67,9 @@ public class SerialService extends Service implements SerialListener {
     public SerialService() {
         mainLooper = new Handler(Looper.getMainLooper());
         binder = new SerialBinder();
-        queue1 = new LinkedList<>();
-        queue2 = new LinkedList<>();
+        queue1 = new ArrayDeque<>();
+        queue2 = new ArrayDeque<>();
+        lastRead = new QueueItem(QueueType.Read);
     }
 
     @Override
@@ -162,7 +168,7 @@ public class SerialService extends Service implements SerialListener {
             switch(item.type) {
                 case Connect:       listener.onSerialConnect      (); break;
                 case ConnectError:  listener.onSerialConnectError (item.e); break;
-                case Read:          listener.onSerialRead         (item.data); break;
+                case Read:          listener.onSerialRead         (item.datas); break;
                 case IoError:       listener.onSerialIoError      (item.e); break;
             }
         }
@@ -170,7 +176,7 @@ public class SerialService extends Service implements SerialListener {
             switch(item.type) {
                 case Connect:       listener.onSerialConnect      (); break;
                 case ConnectError:  listener.onSerialConnectError (item.e); break;
-                case Read:          listener.onSerialRead         (item.data); break;
+                case Read:          listener.onSerialRead         (item.datas); break;
                 case IoError:       listener.onSerialIoError      (item.e); break;
             }
         }
@@ -200,8 +206,9 @@ public class SerialService extends Service implements SerialListener {
                 .setClassName(this, Constants.INTENT_CLASS_MAIN_ACTIVITY)
                 .setAction(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_LAUNCHER);
-        PendingIntent disconnectPendingIntent = PendingIntent.getBroadcast(this, 1, disconnectIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent restartPendingIntent = PendingIntent.getActivity(this, 1, restartIntent,  PendingIntent.FLAG_UPDATE_CURRENT);
+        int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+        PendingIntent disconnectPendingIntent = PendingIntent.getBroadcast(this, 1, disconnectIntent, flags);
+        PendingIntent restartPendingIntent = PendingIntent.getActivity(this, 1, restartIntent,  flags);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setColor(getResources().getColor(R.color.colorPrimary))
@@ -234,11 +241,11 @@ public class SerialService extends Service implements SerialListener {
                         if (listener != null) {
                             listener.onSerialConnect();
                         } else {
-                            queue1.add(new QueueItem(QueueType.Connect, null, null));
+                            queue1.add(new QueueItem(QueueType.Connect));
                         }
                     });
                 } else {
-                    queue2.add(new QueueItem(QueueType.Connect, null, null));
+                    queue2.add(new QueueItem(QueueType.Connect));
                 }
             }
         }
@@ -259,20 +266,28 @@ public class SerialService extends Service implements SerialListener {
                         if (listener != null) {
                             listener.onSerialConnectError(e);
                         } else {
-                            queue1.add(new QueueItem(QueueType.ConnectError, null, e));
-                            cancelNotification();
+                            queue1.add(new QueueItem(QueueType.ConnectError, e));
                             disconnect();
                         }
                     });
                 } else {
-                    queue2.add(new QueueItem(QueueType.ConnectError, null, e));
-                    cancelNotification();
+                    queue2.add(new QueueItem(QueueType.ConnectError, e));
                     disconnect();
                 }
             }
         }
     }
 
+    public void onSerialRead(ArrayDeque<byte[]> datas) { throw new UnsupportedOperationException(); }
+
+    /**
+     * reduce number of UI updates by merging data chunks.
+     * Data can arrive at hundred chunks per second, but the UI can only
+     * perform a dozen updates if receiveText already contains much text.
+     *
+     * On new data inform UI thread once (1).
+     * While not consumed (2), add more data (3).
+     */
     public void onSerialRead(byte[] data) {
         if(connected) {
             Intent intent = new Intent("TASKER_BLE");
@@ -280,16 +295,29 @@ public class SerialService extends Service implements SerialListener {
             sendBroadcast(intent);
             synchronized (this) {
                 if (listener != null) {
-                    mainLooper.post(() -> {
-                        if (listener != null) {
-                            listener.onSerialRead(data);
-                            // Send intent to Tasker
-                        } else {
-                            queue1.add(new QueueItem(QueueType.Read, data, null));
-                        }
-                    });
+                    boolean first;
+                    synchronized (lastRead) {
+                        first = lastRead.datas.isEmpty(); // (1)
+                        lastRead.add(data); // (3)
+                    }
+                    if(first) {
+                        mainLooper.post(() -> {
+                            ArrayDeque<byte[]> datas;
+                            synchronized (lastRead) {
+                                datas = lastRead.datas;
+                                lastRead.init(); // (2)
+                            }
+                            if (listener != null) {
+                                listener.onSerialRead(datas);
+                            } else {
+                                queue1.add(new QueueItem(QueueType.Read, datas));
+                            }
+                        });
+                    }
                 } else {
-                    queue2.add(new QueueItem(QueueType.Read, data, null));
+                    if(queue2.isEmpty() || queue2.getLast().type != QueueType.Read)
+                        queue2.add(new QueueItem(QueueType.Read));
+                    queue2.getLast().add(data);
                 }
             }
         }
@@ -310,14 +338,12 @@ public class SerialService extends Service implements SerialListener {
                         if (listener != null) {
                             listener.onSerialIoError(e);
                         } else {
-                            queue1.add(new QueueItem(QueueType.IoError, null, e));
-                            cancelNotification();
+                            queue1.add(new QueueItem(QueueType.IoError, e));
                             disconnect();
                         }
                     });
                 } else {
-                    queue2.add(new QueueItem(QueueType.IoError, null, e));
-                    cancelNotification();
+                    queue2.add(new QueueItem(QueueType.IoError, e));
                     disconnect();
                 }
             }
