@@ -1,3 +1,4 @@
+# Version 6
 - Fixed foreground notification not properly created
 
 # Version 5
