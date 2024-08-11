@@ -97,6 +97,7 @@ public class SerialService extends Service implements SerialListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "Received start intent");
+        initNotification();
         int startFlag = super.onStartCommand(intent, flags, startId);
         if (ContextCompat.checkSelfPermission(getApplicationContext(), BLUETOOTH_SCAN) != PERMISSION_GRANTED) {
             Log.w(TAG, "Cannot connect because BLUETOOTH_SCAN permission was not granted");
@@ -211,6 +212,7 @@ public class SerialService extends Service implements SerialListener {
     }
 
     private void initNotification() {
+        Log.d(TAG, "initNotification");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel nc = new NotificationChannel(Constants.NOTIFICATION_CHANNEL, "Background service", NotificationManager.IMPORTANCE_LOW);
             nc.setShowBadge(false);
@@ -250,6 +252,7 @@ public class SerialService extends Service implements SerialListener {
             // @drawable/ic_notification created with Android Studio -> New -> Image Asset using @color/colorPrimaryDark as background color
             // Android < API 21 does not support vectorDrawables in notifications, so both drawables used here, are created as .png instead of .xml
             Notification notification = builder.build();
+            Log.d(TAG, "Calling startForeground");
             startForeground(Constants.NOTIFY_MANAGER_START_FOREGROUND_SERVICE, notification);
         }
     }

@@ -1,3 +1,5 @@
+- Fixed foreground notification not properly created
+
 # Version 5
 - Fixed bug if Bluetooth Scan is not enabled which resulted in a lot of intents being sent
 - Fixed app not working properly when notifications are disabled
