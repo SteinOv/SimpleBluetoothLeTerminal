@@ -8,7 +8,7 @@ When a message by the BLE device is received, a broadcast intent is sent. When l
 the service will try to reconnect for a configurable amount of time. <br>
 Keep in mind that the external intents can be sent by any app, which may be a security risk. I made this mainly with a 
 personal Arduino project in mind and this is my first time coding in Android, so there may be some bugs/imperfections. 
-If you spot any, please let me know. 
+If you spot any, feel free to create a PR.
 
 ### Known bugs
 - Service crashes when sending another connect command while it is trying to establish a connection or trying to reconnect.
@@ -16,9 +16,11 @@ If you spot any, please let me know.
 - When trying to send a message while the service is reconnecting, it will stop trying to reconnect.
 - Connecting using the GUI after service is connected through intent results in two connections at the same time 
 (and two intents are received for each message)
+- If you install the app and don't allow the `Nearby Devices` permission, a lot of `TASKER_BLE_EVENT` intents will be send, 
+which may cause issues if you use this intent to start a Tasker task, resulting in a lot of tasks being started.
 
-I will probably only fix these bugs when they give me problems. So if they give problems for you, let me know, I'll see 
-if I have time to fix them. 
+Since these don't give me problems in my personal project I have no plans for fixing them. If you want to fix them, 
+feel free to create a PR.
 
 ## How To Use
 First install the apk which can be found under app -> release
