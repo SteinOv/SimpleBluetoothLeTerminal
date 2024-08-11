@@ -1,5 +1,8 @@
 package de.kai_morich.simple_bluetooth_le_terminal;
 
+import static android.Manifest.permission.BLUETOOTH_SCAN;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -16,9 +19,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
+import android.util.Log;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -48,6 +54,8 @@ public class SerialService extends Service implements SerialListener {
         void init() { datas = new ArrayDeque<>(); }
         void add(byte[] data) { datas.add(data); }
     }
+
+    private static final String TAG = "SerialService";
 
     private final Handler mainLooper;
     private final IBinder binder;
@@ -88,8 +96,15 @@ public class SerialService extends Service implements SerialListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "Received start intent");
         int startFlag = super.onStartCommand(intent, flags, startId);
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), BLUETOOTH_SCAN) != PERMISSION_GRANTED) {
+            Log.w(TAG, "Cannot connect because BLUETOOTH_SCAN permission was not granted");
+            Toast.makeText(getApplicationContext(), "Bluetooth Scan permission not granted", Toast.LENGTH_SHORT).show();
+            return startFlag;
+        }
         String command = intent.getStringExtra("command");
+        Log.d(TAG, "Start intent command: " + command);
         if (command != null && command.equalsIgnoreCase("connect") && intent.hasExtra("macAddress")) {
             String macAddress = intent.getStringExtra("macAddress");
             reconnectTimeout = intent.getIntExtra("reconnectTimeout", reconnectTimeout);

@@ -1,3 +1,5 @@
+- Fixed bug if Bluetooth Scan is not enabled which resulted in a lot of intents being sent
+
 # Version 4
 - Merged original repo master branch (i.a. update to API level 34, android 14)
 
