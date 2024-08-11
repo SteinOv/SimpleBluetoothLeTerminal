@@ -15,8 +15,6 @@ If you spot any, feel free to create a PR.
 - When trying to send a message while the service is reconnecting, it will stop trying to reconnect.
 - Connecting using the GUI after service is connected through intent results in two connections at the same time 
 (and two intents are received for each message)
-- If you install the app and don't allow the `Nearby Devices` permission, a lot of `TASKER_BLE_EVENT` intents will be send, 
-which may cause issues if you use this intent to start a Tasker task, resulting in a lot of tasks being started.
 
 Since these don't give me problems in my personal project I have no plans for fixing them. If you want to fix them, 
 feel free to create a PR.
