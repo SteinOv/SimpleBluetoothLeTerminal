@@ -118,7 +118,7 @@ public class SerialService extends Service implements SerialListener {
         } else if (command != null && command.equalsIgnoreCase("disconnect")) {
             sendTaskerDebugIntent("Stopping BLE service");
             disconnect();
-            stopSelf();
+            createNotification();
         } else if (command != null && command.equalsIgnoreCase("send")) {
             String text = intent.getStringExtra("text");
             if (text == null) {
@@ -237,18 +237,21 @@ public class SerialService extends Service implements SerialListener {
         int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
         PendingIntent disconnectPendingIntent = PendingIntent.getBroadcast(this, 1, disconnectIntent, flags);
         PendingIntent restartPendingIntent = PendingIntent.getActivity(this, 1, restartIntent,  flags);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setColor(getResources().getColor(R.color.colorPrimary))
-                .setContentTitle(getResources().getString(R.string.app_name))
-                .setContentText(socket != null ? "Connected to "+socket.getName() : "Background Service")
-                .setContentIntent(restartPendingIntent)
-                .setOngoing(true)
-                .addAction(new NotificationCompat.Action(R.drawable.ic_clear_white_24dp, "Disconnect", disconnectPendingIntent));
-        // @drawable/ic_notification created with Android Studio -> New -> Image Asset using @color/colorPrimaryDark as background color
-        // Android < API 21 does not support vectorDrawables in notifications, so both drawables used here, are created as .png instead of .xml
-        Notification notification = builder.build();
-        startForeground(Constants.NOTIFY_MANAGER_START_FOREGROUND_SERVICE, notification);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || areNotificationsEnabled()) {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.NOTIFICATION_CHANNEL)
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setColor(getResources().getColor(R.color.colorPrimary))
+                    .setContentTitle(getResources().getString(R.string.app_name))
+                    .setContentText(socket != null ? "Connected to " + socket.getName() : "Background Service")
+                    .setContentIntent(restartPendingIntent)
+                    .setOngoing(true)
+                    .addAction(new NotificationCompat.Action(R.drawable.ic_clear_white_24dp, "Disconnect", disconnectPendingIntent));
+            // @drawable/ic_notification created with Android Studio -> New -> Image Asset using @color/colorPrimaryDark as background color
+            // Android < API 21 does not support vectorDrawables in notifications, so both drawables used here, are created as .png instead of .xml
+            Notification notification = builder.build();
+            startForeground(Constants.NOTIFY_MANAGER_START_FOREGROUND_SERVICE, notification);
+        }
     }
 
     private void cancelNotification() {
