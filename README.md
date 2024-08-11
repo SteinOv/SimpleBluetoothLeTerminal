@@ -1,5 +1,4 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/3f9ba45b5c5449179150010659311f57)](https://www.codacy.com/manual/kai-morich/SimpleBluetoothLeTerminal?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kai-morich/SimpleBluetoothLeTerminal&amp;utm_campaign=Badge_Grade)
-
 # SimpleBluetoothLeTerminal - fork for use with Tasker
 
 This is a fork of [SimpleBluetoothLeTerminal](https://github.com/kai-morich/SimpleBluetoothLETerminal) with the main goal 
@@ -70,7 +69,7 @@ This Android app provides a line-oriented terminal / console for Bluetooth LE (4
 For an overview on Android BLE communication see 
 [Android Bluetooth LE Overview](https://developer.android.com/guide/topics/connectivity/bluetooth/ble-overview).
 
-In contrast to classic Bluetooth, there is no predifined serial profile for Bluetooth LE, 
+In contrast to classic Bluetooth, there is no predefined serial profile for Bluetooth LE, 
 so each vendor uses GATT services with different service and characteristic UUIDs.
 
 This app includes UUIDs for widely used serial profiles:
