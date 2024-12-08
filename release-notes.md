@@ -1,3 +1,7 @@
+# Version 7
+- Updated gradle version
+- Merge changes from original repo
+
 # Version 6
 - Fixed foreground notification not properly created
 
