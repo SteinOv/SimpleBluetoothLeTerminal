@@ -1,6 +1,8 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/3f9ba45b5c5449179150010659311f57)](https://www.codacy.com/manual/kai-morich/SimpleBluetoothLeTerminal?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kai-morich/SimpleBluetoothLeTerminal&amp;utm_campaign=Badge_Grade)
 # SimpleBluetoothLeTerminal - fork for use with Tasker
 
+**Note: I made a Tasker plugin that replaces this: https://play.google.com/store/apps/details?id=nl.steinov.bletaskerplugin**
+
 This is a fork of [SimpleBluetoothLeTerminal](https://github.com/kai-morich/SimpleBluetoothLETerminal) with the main goal 
 to be able to communicate with BLE devices using Tasker. You can connect, send and disconnect to BLE devices by sending intents. 
 When a message by the BLE device is received, a broadcast intent is sent. When losing the connection or failing to connect, 
@@ -81,3 +83,4 @@ This app includes UUIDs for widely used serial profiles:
 I got various requests asking for help with Android development or source code for my
 [Serial Bluetooth Terminal](https://play.google.com/store/apps/details?id=de.kai_morich.serial_bluetooth_terminal) app.
 Here you find a simplified version of my app.
+
